@@ -1,5 +1,7 @@
 import 'dart:ui';
 
+import 'package:aippmsa/auth/sign_up.dart';
+import 'package:aippmsa/components/full_width_button.dart';
 import 'package:aippmsa/components/input_field.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
@@ -137,23 +139,19 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             ),
           ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: SizedBox(
-              width: double.infinity, // Full width
-              child: ElevatedButton(
-                onPressed: () {
-                  // Handle button press
-                },
-                style: ElevatedButton.styleFrom(
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.zero, // No rounded edges
-                  ), backgroundColor: const Color(0xFF9775FA),
-                  padding: const EdgeInsets.symmetric(vertical: 16.0), // Button color
-                ),
-                child: const Text('Login', style: TextStyle(fontFamily: 'Inter', fontSize: 17, color: Colors.white, fontWeight: FontWeight.bold),),
-              ),
-            ),
+          FullWidthButton(
+            text: 'Login',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SignUp()),
+              );
+            },
+            backgroundColor: const Color(0xFF9775FA),
+            paddingVertical: 16.0,
+            fontSize: 17.0,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Inter',
           ),
         ],
       ),
