@@ -1,12 +1,10 @@
-import 'dart:ui';
-
 import 'package:aippmsa/auth/sign_up.dart';
+import 'package:aippmsa/auth/forgot_password.dart';
 import 'package:aippmsa/components/full_width_button.dart';
 import 'package:aippmsa/components/input_field.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:aippmsa/dashboard.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 void main() {
   runApp(const MyApp());
@@ -84,7 +82,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     InkWell(
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => ForgotPassword()),
+                        );
+                      },
                       child: const Text(
                         'forgot password?',
                         style: TextStyle(fontWeight: FontWeight.normal, color: Colors.red),
@@ -95,7 +98,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 SizedBox(height: deviceHeight * 0.08),
                 Center(
                   child: InkWell(
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => SignUp()),
+                      );
+                    },
                     child: const Text(
                       'Sign up Here',
                       style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue, fontSize: 15, fontFamily: 'Inter'),
@@ -144,7 +152,7 @@ class _MyHomePageState extends State<MyHomePage> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => SignUp()),
+                MaterialPageRoute(builder: (context) => Dashboard()),
               );
             },
             backgroundColor: const Color(0xFF9775FA),
