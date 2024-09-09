@@ -8,6 +8,7 @@ class FullWidthButton extends StatelessWidget {
   final double fontSize;
   final FontWeight fontWeight;
   final String fontFamily;
+  final Widget? child;
 
   const FullWidthButton({
     super.key,
@@ -18,6 +19,7 @@ class FullWidthButton extends StatelessWidget {
     this.fontSize = 17.0,
     this.fontWeight = FontWeight.bold,
     this.fontFamily = 'Inter',
+    this.child,
   });
 
   @override
@@ -35,7 +37,7 @@ class FullWidthButton extends StatelessWidget {
             backgroundColor: backgroundColor, // Button color
             padding: EdgeInsets.symmetric(vertical: paddingVertical),
           ),
-          child: Text(
+          child: child ?? Text(
             text,
             style: TextStyle(
               fontFamily: fontFamily,

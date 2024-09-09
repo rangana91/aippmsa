@@ -13,13 +13,13 @@ class DashboardState extends State<Dashboard> {
   bool _isDrawerOpen = false;
 
   void _toggleDrawer() {
+    if (_isDrawerOpen) {
+      _scaffoldKey.currentState?.closeDrawer(); // Use closeDrawer to close
+    } else {
+      _scaffoldKey.currentState?.openDrawer(); // Use openDrawer to open
+    }
     setState(() {
-      _isDrawerOpen = !_isDrawerOpen;
-      if (_isDrawerOpen) {
-        _scaffoldKey.currentState?.openDrawer();
-      } else {
-        Navigator.of(context).pop(); // Close the drawer
-      }
+      _isDrawerOpen = !_isDrawerOpen; // Update drawer state
     });
   }
 
@@ -64,12 +64,12 @@ class DashboardState extends State<Dashboard> {
       appBar: AppBar(
         actions: [
           IconButton(
-              onPressed: (){},
-              icon: const Icon(
-                Icons.shopping_bag_outlined, // Replace with your desired icon
-                color: Colors.black,
-                size: 24.0,
-              ),
+            onPressed: (){},
+            icon: const Icon(
+              Icons.shopping_bag_outlined, // Replace with your desired icon
+              color: Colors.black,
+              size: 24.0,
+            ),
           )
         ],
         leading: IconButton(

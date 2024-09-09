@@ -5,6 +5,7 @@ class GenderSelectionInput extends StatelessWidget {
   final String? selectedGender;
   final void Function(String?) onChanged;
   final String? Function(String?)? validator;
+  final String? errorText;
 
   const GenderSelectionInput({
     super.key,
@@ -12,6 +13,7 @@ class GenderSelectionInput extends StatelessWidget {
     required this.selectedGender,
     required this.onChanged,
     this.validator,
+    this.errorText,
   });
 
   @override
@@ -21,6 +23,7 @@ class GenderSelectionInput extends StatelessWidget {
       child: DropdownButtonFormField<String>(
         value: selectedGender,
         decoration: InputDecoration(
+          errorText: errorText,
           labelText: label,
           border: const UnderlineInputBorder(
             borderSide: BorderSide(color: Colors.blue),

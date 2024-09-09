@@ -6,6 +6,8 @@ class FloatingLabelInput extends StatefulWidget {
   final TextInputType keyboardType;
   final bool obscureText;
   final String? Function(String?)? validator;
+  final String? errorText;
+  final void Function(String)? onChanged;
 
   const FloatingLabelInput({
     super.key,
@@ -14,6 +16,8 @@ class FloatingLabelInput extends StatefulWidget {
     this.controller,
     this.keyboardType = TextInputType.text,
     this.validator,
+    this.errorText,
+    this.onChanged,
   });
 
   @override
@@ -47,6 +51,7 @@ class FloatingLabelInputState extends State<FloatingLabelInput> {
         validator: widget.validator,
         decoration: InputDecoration(
           labelText: widget.label,
+          errorText: widget.errorText,
           labelStyle: TextStyle(
             color: _focusNode.hasFocus ? Colors.blue : Colors.grey,
             fontSize: _focusNode.hasFocus ? 14.0 : 16.0,
@@ -63,6 +68,7 @@ class FloatingLabelInputState extends State<FloatingLabelInput> {
           ),
           contentPadding: const EdgeInsets.only(bottom: 8.0),
         ),
+        onChanged: widget.onChanged,
       ),
     );
   }
