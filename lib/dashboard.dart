@@ -1,5 +1,9 @@
-import 'package:aippmsa/components/custom_drawer.dart';
+import 'package:aippmsa/Services/ApiServices.dart';
+import 'package:aippmsa/Services/item_service.dart';
+import 'package:aippmsa/components/item_future_builder.dart';
+import 'package:aippmsa/models/Item.dart';
 import 'package:flutter/material.dart';
+import 'package:aippmsa/components/custom_drawer.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -11,17 +15,10 @@ class Dashboard extends StatefulWidget {
 class DashboardState extends State<Dashboard> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _isDrawerOpen = false;
-
-  void _toggleDrawer() {
-    if (_isDrawerOpen) {
-      _scaffoldKey.currentState?.closeDrawer(); // Use closeDrawer to close
-    } else {
-      _scaffoldKey.currentState?.openDrawer(); // Use openDrawer to open
-    }
-    setState(() {
-      _isDrawerOpen = !_isDrawerOpen; // Update drawer state
-    });
-  }
+  bool _isLoading = false;
+  late Future<List<Item>> _itemsWomenFuture;
+  late Future<List<Item>> _itemsMenFuture;
+  late Future<List<Item>> _itemsKidFuture;
 
   // Define the map of items and their asset paths
   final Map<String, String> items = {
@@ -58,15 +55,47 @@ class DashboardState extends State<Dashboard> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _refreshItems();
+  }
+
+  Future<void> _refreshItems() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    await ItemService().updateItemList();
+
+    setState(() {
+      _isLoading = false;
+      _itemsWomenFuture = ItemService().getItemsByCategory('women');
+      _itemsMenFuture = ItemService().getItemsByCategory('men');
+      _itemsKidFuture = ItemService().getItemsByCategory('kids');
+    });
+  }
+
+  void _toggleDrawer() {
+    if (_isDrawerOpen) {
+      _scaffoldKey.currentState?.closeDrawer(); // Use closeDrawer to close
+    } else {
+      _scaffoldKey.currentState?.openDrawer(); // Use openDrawer to open
+    }
+    setState(() {
+      _isDrawerOpen = !_isDrawerOpen; // Update drawer state
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
         actions: [
           IconButton(
-            onPressed: (){},
+            onPressed: () {},
             icon: const Icon(
-              Icons.shopping_bag_outlined, // Replace with your desired icon
+              Icons.shopping_bag_outlined,
               color: Colors.black,
               size: 24.0,
             ),
@@ -88,219 +117,262 @@ class DashboardState extends State<Dashboard> {
         isOpen: _isDrawerOpen,
         onToggleDrawer: _toggleDrawer,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(14.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'AIPPMSA',
-              style: TextStyle(
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.bold,
-                fontSize: 28,
+      body: RefreshIndicator(
+        onRefresh: _refreshItems,
+        child: _isLoading
+            ? const Center(
+          child: CircularProgressIndicator(), // Display loader while loading
+        )
+            : SingleChildScrollView(
+          padding: const EdgeInsets.all(14.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'AIPPMSA',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.bold,
+                  fontSize: 28,
+                ),
               ),
-            ),
-            const Text(
-              'Hi! Rangana',
-              style: TextStyle(
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.normal,
-                fontSize: 15,
-                color: Color(0xff8F959E),
+              const Text(
+                'Hi! Rangana',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.normal,
+                  fontSize: 15,
+                  color: Color(0xff8F959E),
+                ),
               ),
-            ),
-            const SizedBox(height: 12.0,),
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xffF5F6FA),
-                      borderRadius: BorderRadius.circular(10.0),
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: TextField(
-                      decoration: InputDecoration(
-                        fillColor: const Color(0xffF5F6FA),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
-                        border: InputBorder.none,
-                        hintText: 'Search...',
-                        hintStyle: TextStyle(
-                          color: Colors.grey.shade600,
+              const SizedBox(height: 12.0),
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xffF5F6FA),
+                        borderRadius: BorderRadius.circular(10.0),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: TextField(
+                        decoration: InputDecoration(
+                          fillColor: const Color(0xffF5F6FA),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+                          border: InputBorder.none,
+                          hintText: 'Search...',
+                          hintStyle: TextStyle(
+                            color: Colors.grey.shade600,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10.0),
-                    color: Colors.blue,
-                  ),
-                  child: IconButton(
-                    onPressed: () {
-                    },
-                    icon: const Icon(
-                      Icons.search,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Most Popular',
-              style: TextStyle(
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.w600,
-                fontSize: 19,
-                color: Color(0xff1D1E20),
-              ),
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              height: 70,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: items.entries.map((entry) {
-                  return Container(
-                    margin: const EdgeInsets.only(right: 18.0),
-                    padding: const EdgeInsets.all(8.0),
+                  const SizedBox(width: 10),
+                  Container(
+                    width: 50,
+                    height: 50,
                     decoration: BoxDecoration(
-                      color: const Color(0xffF5F6FA),
-                      borderRadius: BorderRadius.circular(15.0),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.2),
-                          spreadRadius: 1,
-                          blurRadius: 5,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
+                      borderRadius: BorderRadius.circular(10.0),
+                      color: Colors.blue,
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 60,
-                          height: 60,
-                          margin: const EdgeInsets.only(right: 8.0),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(10.0),
-                            child: Image.asset(
-                              entry.value,
-                              fit: BoxFit.cover,
+                    child: IconButton(
+                      onPressed: () {},
+                      icon: const Icon(
+                        Icons.search,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Most Popular',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 19,
+                  color: Color(0xff1D1E20),
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                height: 70,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: items.entries.map((entry) {
+                    return Container(
+                      margin: const EdgeInsets.only(right: 18.0),
+                      padding: const EdgeInsets.all(8.0),
+                      decoration: BoxDecoration(
+                        color: const Color(0xffF5F6FA),
+                        borderRadius: BorderRadius.circular(15.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.2),
+                            spreadRadius: 1,
+                            blurRadius: 5,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 60,
+                            height: 60,
+                            margin: const EdgeInsets.only(right: 8.0),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10.0),
+                              child: Image.asset(
+                                entry.value,
+                                fit: BoxFit.cover,
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 8.0),
-                        Flexible(
-                          child: Text(
-                            entry.key,
-                            style: const TextStyle(
+                          const SizedBox(width: 8.0),
+                          Flexible(
+                            child: Text(
+                              entry.key,
+                              style: const TextStyle(
                                 fontSize: 15,
                                 color: Colors.black,
                                 fontFamily: 'Inter',
-                                fontWeight: FontWeight.w400
+                                fontWeight: FontWeight.w400,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Recommended For You',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 19,
+                  color: Color(0xff1D1E20),
+                ),
+              ),
+              const SizedBox(height: 20),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 14.0,
+                  mainAxisSpacing: 14.0,
+                  childAspectRatio: 0.65,
+                ),
+                itemCount: recommendedItems.length,
+                itemBuilder: (context, index) {
+                  final item = recommendedItems[index];
+                  const cardHeight = 400.0;
+
+                  return SizedBox(
+                    height: cardHeight,
+                    child: Card(
+                      color: const Color(0xffF5F6FA),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15.0),
+                      ),
+                      elevation: 5,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            height: cardHeight * 0.40,
+                            decoration: const BoxDecoration(
+                              borderRadius: BorderRadius.vertical(top: Radius.circular(15.0)),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: const BorderRadius.vertical(top: Radius.circular(15.0)),
+                              child: Image.asset(
+                                item['image']!,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item['description']!,
+                                  style: const TextStyle(
+                                    fontFamily: 'Inter',
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 11,
+                                    color: Color(0xff1D1E20),
+                                  ),
+                                ),
+                                const SizedBox(height: 8.0),
+                                Text(
+                                  item['price']!,
+                                  style: const TextStyle(
+                                    fontFamily: 'Inter',
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                    color: Color(0xff1D1E20),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   );
-                }).toList(),
+                },
               ),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Recommended For You',
-              style: TextStyle(
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.w600,
-                fontSize: 19,
-                color: Color(0xff1D1E20),
+              const SizedBox(height: 20),
+              const Text(
+                'For Men',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 19,
+                  color: Color(0xff1D1E20),
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 14.0,
-                mainAxisSpacing: 14.0,
-                childAspectRatio: 0.65,
+              const SizedBox(height: 20),
+              ItemFutureBuilder(futureItems: _itemsMenFuture),
+              const SizedBox(height: 20),
+              const Text(
+                'For Women',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 19,
+                  color: Color(0xff1D1E20),
+                ),
               ),
-              itemCount: recommendedItems.length,
-              itemBuilder: (context, index) {
-                final item = recommendedItems[index];
-                const cardHeight = 400.0;
+              const SizedBox(height: 20),
+              ItemFutureBuilder(futureItems: _itemsWomenFuture),
+              const SizedBox(height: 20),
+              const Text(
+                'For Kids',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 19,
+                  color: Color(0xff1D1E20),
+                ),
+              ),
+              const SizedBox(height: 20),
+              ItemFutureBuilder(futureItems: _itemsKidFuture),
+            ],
 
-                return SizedBox(
-                  height: cardHeight,
-                  child: Card(
-                    color: const Color(0xffF5F6FA),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15.0),
-                    ),
-                    elevation: 5,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          height: cardHeight * 0.40,
-                          decoration: const BoxDecoration(
-                            borderRadius: BorderRadius.vertical(top: Radius.circular(15.0)),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: const BorderRadius.vertical(top: Radius.circular(15.0)),
-                            child: Image.asset(
-                              item['image']!,
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                item['description']!,
-                                style: const TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 11,
-                                  color: Color(0xff1D1E20),
-                                ),
-                              ),
-                              const SizedBox(height: 8.0),
-                              Text(
-                                item['price']!,
-                                style: const TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
-                                  color: Color(0xff1D1E20),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            )
-          ],
+          ),
         ),
       ),
     );

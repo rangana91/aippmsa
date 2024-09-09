@@ -1,10 +1,13 @@
-import 'package:aippmsa/models/auth_response_model.dart';
-import 'package:aippmsa/models/password_reset_response.dart';
-import 'package:aippmsa/models/register_response_model.dart';
+import 'package:aippmsa/models/Item.dart';
+import 'package:aippmsa/response/auth_response_model.dart';
+import 'package:aippmsa/response/password_reset_response.dart';
+import 'package:aippmsa/response/register_response_model.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ApiServices {
   static late Dio _dio;
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
   // Defining the base urls
   static const String _devBaseUrl = 'https://dev.example.com/api';
@@ -23,6 +26,13 @@ class ApiServices {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     };
+  }
+
+  Future<void> _setAuthorizationHeader() async {
+    final token = await _secureStorage.read(key: 'authToken');
+    if (token != null) {
+      _dio.options.headers['Authorization'] = 'Bearer $token';
+    }
   }
 
   //login
@@ -106,6 +116,13 @@ class ApiServices {
         return PasswordResetResponse.fromJson(e.response?.data);
       }
     }
+  }
+
+  //fetch item list
+  Future<List<dynamic>> fetchItems() async {
+    await _setAuthorizationHeader();
+    final response = await _dio.get('$_baseUrl/items');
+    return response.data as List<dynamic>;
   }
 
 }

@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:aippmsa/Services/ApiServices.dart';
+import 'package:aippmsa/Services/item_service.dart';
 import 'package:aippmsa/auth/sign_up.dart';
 import 'package:aippmsa/auth/forgot_password.dart';
 import 'package:aippmsa/components/full_width_button.dart';
@@ -65,10 +66,11 @@ class _MyHomePageState extends State<MyHomePage> {
     try {
       final apiService = ApiServices();
       final authResponse = await apiService.login(email, password);
-print(authResponse);
+
       if (authResponse.token != null) {
         await storage.write(key: 'authToken', value: authResponse.token);
         if (mounted) {
+          ItemService().updateItemList();
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const Dashboard()),
