@@ -1,5 +1,6 @@
 import 'package:aippmsa/Services/ApiServices.dart';
 import 'package:aippmsa/Services/item_service.dart';
+import 'package:aippmsa/cart_page.dart';
 import 'package:aippmsa/components/item_future_builder.dart';
 import 'package:aippmsa/models/Item.dart';
 import 'package:flutter/material.dart';
@@ -93,7 +94,12 @@ class DashboardState extends State<Dashboard> {
       appBar: AppBar(
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CartPage()),
+              );
+            },
             icon: const Icon(
               Icons.shopping_bag_outlined,
               color: Colors.black,

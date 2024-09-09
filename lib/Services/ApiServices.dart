@@ -11,7 +11,7 @@ class ApiServices {
 
   // Defining the base urls
   static const String _devBaseUrl = 'https://dev.example.com/api';
-  static const String _localBaseUrl = 'https://f109-2402-4000-b280-48f5-accb-5d6f-c9f9-5c35.ngrok-free.app/api';
+  static const String _localBaseUrl = 'https://db59-2402-4000-b281-1884-fda9-5078-8f2d-bc2d.ngrok-free.app/api';
   static const String _prodBaseUrl = 'https://prod.example.com/api';
 
   static const String _baseUrl = _localBaseUrl;

@@ -10,9 +10,11 @@ import 'package:aippmsa/dashboard.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  Stripe.publishableKey = 'pk_test_51PpiigHB3paMEYnVX90sv6bNhwVJBlL92TfDR0AVXfR9laCm1nyhqotTFsoOZoL0p6WQK7j8vFiLoSTdPsbiulfw00ZOgocbyE';
   const storage = FlutterSecureStorage();
   final token = await storage.read(key: 'authToken');
 
