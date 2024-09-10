@@ -16,8 +16,8 @@ class Order {
     return Order(
       id: map['id'],
       orderNumber: map['id'], // Adjust based on your API field names
-      itemCount: map['item_count'],     // Directly from API response
-      status: map['status'],
+      itemCount: map['items_count'],     // Directly from API response
+      status: map['status_name'],
     );
   }
 
@@ -26,8 +26,8 @@ class Order {
     return {
       'id': id,
       'order_id': orderNumber,
-      'item_count': itemCount,
-      'status': status,
+      'items_count': itemCount,
+      'status_name': status,
     };
   }
 }

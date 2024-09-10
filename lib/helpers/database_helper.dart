@@ -50,8 +50,8 @@ class DatabaseHelper {
           CREATE TABLE orders (
             id INTEGER PRIMARY KEY,
             order_id INTEGER,
-            item_count INTEGER,
-            status TEXT
+            items_count INTEGER,
+            status_name TEXT
           )
         ''');
       },

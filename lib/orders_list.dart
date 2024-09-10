@@ -28,6 +28,7 @@ class OrdersListState extends State<OrdersList> with SingleTickerProviderStateMi
     });
 
     try {
+      await _refreshOrders();
       final orders = await OrderService().fetchOrdersFromLocalDb();
       setState(() {
         _orders = orders;
@@ -45,7 +46,7 @@ class OrdersListState extends State<OrdersList> with SingleTickerProviderStateMi
   Future<void> _refreshOrders() async {
     try {
       await OrderService().fetchAndSaveOrders(); // Fetch from API and save to local DB
-      await _loadOrders(); // Reload from the local DB
+      // await _loadOrders(); // Reload from the local DB
     } catch (e) {
       print(e);
       if (mounted) {

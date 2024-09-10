@@ -13,7 +13,7 @@ class OrderService {
       // Store the orders in the local database
       await clearOrders(); // Clear old orders
       for (var order in ordersFromApi) {
-        print(order);
+        print('ORDER $order');
         final parsedOrder = Order.fromMap(order); // Parse the response
         await insertOrder(parsedOrder); // Save in local DB
       }
@@ -33,6 +33,7 @@ class OrderService {
   Future<List<Order>> fetchOrdersFromLocalDb() async {
     final db = await DatabaseHelper().database;
     final List<Map<String, dynamic>> maps = await db.query('orders');
+    print('Order TEST: $maps');
     return List.generate(maps.length, (i) {
       return Order.fromMap(maps[i]);
     });
