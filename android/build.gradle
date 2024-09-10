@@ -1,3 +1,16 @@
+buildscript {
+    ext.kotlin_version = '2.0.10' // Update this to the latest Kotlin version
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.1.4' // Ensure this version is up to date
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "com.google.gms:google-services:4.4.2" // If you're using Firebase
+        // Other classpath dependencies, if any
+    }
+}
 allprojects {
     repositories {
         google()

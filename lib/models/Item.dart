@@ -1,6 +1,4 @@
-import 'package:aippmsa/Services/ApiServices.dart';
-import 'package:aippmsa/helpers/database_helper.dart';
-import 'package:sqflite/sqflite.dart';
+import 'ItemVariant.dart';  // Make sure to import the ItemVariant class
 
 class Item {
   final int id;
@@ -10,6 +8,7 @@ class Item {
   final double price;
   final String categoryName;
   final String categoryDisplayName;
+  List<ItemVariant> variants = [];  // Add a field to store item variants
 
   Item({
     required this.id,
@@ -19,9 +18,10 @@ class Item {
     required this.price,
     required this.categoryName,
     required this.categoryDisplayName,
+    this.variants = const [],  // Initialize with an empty list by default
   });
 
-  // Convert an Item into a Map for SQLite
+  // Convert Item to a Map to store in the database
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -31,10 +31,11 @@ class Item {
       'price': price,
       'category_name': categoryName,
       'category_display_name': categoryDisplayName,
+      // You won't store variants here directly; you'll store them separately
     };
   }
 
-  // Convert a Map into an Item
+  // Create an Item from a Map (retrieving from the database)
   factory Item.fromMap(Map<String, dynamic> map) {
     return Item(
       id: map['id'],
@@ -44,7 +45,12 @@ class Item {
       price: map['price'],
       categoryName: map['category_name'],
       categoryDisplayName: map['category_display_name'],
+      variants: [], // Initialize an empty variant list (you'll populate this later)
     );
   }
 
+  // Method to assign variants to the item
+  void setVariants(List<ItemVariant> itemVariants) {
+    variants = itemVariants;
+  }
 }

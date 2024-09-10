@@ -1,5 +1,7 @@
+import 'package:aippmsa/providers/cart_provider.dart';
 import 'package:aippmsa/shipping_details.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class CartPage extends StatefulWidget {
   const CartPage({super.key});
@@ -9,14 +11,11 @@ class CartPage extends StatefulWidget {
 }
 
 class CartPageState extends State<CartPage> {
-  // Initialize variables for quantities and prices
-  int _quantity1 = 1;
-  int _quantity2 = 1;
-  double _price1 = 148.0;
-  double _price2 = 52.0;
-
   @override
   Widget build(BuildContext context) {
+    final cartProvider = Provider.of<CartProvider>(context);
+    final cartItems = cartProvider.cartItems;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -34,7 +33,7 @@ class CartPageState extends State<CartPage> {
         actions: [
           TextButton(
             onPressed: () {
-              // Remove all action
+              cartProvider.clearCart();
             },
             child: const Text(
               'Remove All',
@@ -43,39 +42,39 @@ class CartPageState extends State<CartPage> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
+      body: cartItems.isEmpty
+          ? const Center(
+        child: Text(
+          'Your cart is empty.',
+          style: TextStyle(fontSize: 18),
+        ),
+      )
+          : SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildCartItem(
-              imageUrl: 'https://via.placeholder.com/100', // Replace with actual image URL
-              itemName: "Men's Harrington Jacket",
-              size: 'M',
-              color: 'Lemon',
-              price: _price1,
-              quantity: _quantity1,
-              onQuantityChanged: (newQuantity) {
-                setState(() {
-                  _quantity1 = newQuantity;
-                });
-              },
-            ),
-            _buildCartItem(
-              imageUrl: 'https://via.placeholder.com/100', // Replace with actual image URL
-              itemName: "Men's Coaches Jacket",
-              size: 'M',
-              color: 'Black',
-              price: _price2,
-              quantity: _quantity2,
-              onQuantityChanged: (newQuantity) {
-                setState(() {
-                  _quantity2 = newQuantity;
-                });
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: cartItems.length,
+              itemBuilder: (context, index) {
+                final cartItem = cartItems[index];
+                return _buildCartItem(
+                  imageUrl: cartItem.item.image,
+                  itemName: cartItem.item.name,
+                  size: cartItem.size,
+                  color: cartItem.color,
+                  price: cartItem.item.price,
+                  quantity: cartItem.quantity,
+                  onQuantityChanged: (newQuantity) {
+                    cartProvider.updateQuantity(cartItem, newQuantity);
+                  },
+                );
               },
             ),
             const SizedBox(height: 16.0),
-            _buildPriceSummary(),
+            _buildPriceSummary(cartProvider),
             const SizedBox(height: 16.0),
             _buildCouponInput(),
             const SizedBox(height: 16.0),
@@ -145,21 +144,20 @@ class CartPageState extends State<CartPage> {
                         ),
                       ),
                     ],
-                  )
-
+                  ),
                 ],
               ),
             ),
             const SizedBox(width: 10),
-            // Quantity Controls and Price
             Column(
               children: [
                 Row(
                   children: [
-                    // Decrement Button
                     _buildQuantityButton(Icons.remove, () {
                       if (quantity > 1) {
                         onQuantityChanged(quantity - 1);
+                      } else {
+                        onQuantityChanged(0);
                       }
                     }),
                     const SizedBox(width: 5),
@@ -205,18 +203,13 @@ class CartPageState extends State<CartPage> {
     );
   }
 
-  Widget _buildPriceSummary() {
-    double subtotal = (_quantity1 * _price1) + (_quantity2 * _price2);
-    double shippingCost = 8.0;
-    double tax = 0.0;
-    double total = subtotal + shippingCost + tax;
-
+  Widget _buildPriceSummary(CartProvider cartProvider) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildPriceRow('Subtotal', subtotal),
-        _buildPriceRow('Shipping Cost', shippingCost),
-        _buildPriceRow('Tax', tax),
+        _buildPriceRow('Subtotal', cartProvider.totalPrice),
+        _buildPriceRow('Shipping Cost', 8.0),
+        _buildPriceRow('Tax', 0.0),
         const SizedBox(height: 10),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -226,7 +219,7 @@ class CartPageState extends State<CartPage> {
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             Text(
-              '\$$total',
+              '\$${cartProvider.totalPrice + 8.0}',
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
           ],
@@ -291,10 +284,19 @@ class CartPageState extends State<CartPage> {
           ),
         ),
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const ShippingDetails()),
-          );
+          final cartProvider = Provider.of<CartProvider>(context, listen: false);
+
+          // Check stock availability before proceeding
+          if (cartProvider.isStockAvailable()) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ShippingDetails()),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('One or more items exceed available stock!')),
+            );
+          }
         },
         child: const Text(
           'Proceed',
@@ -303,4 +305,5 @@ class CartPageState extends State<CartPage> {
       ),
     );
   }
+
 }

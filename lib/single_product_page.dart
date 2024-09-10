@@ -1,6 +1,10 @@
 import 'package:aippmsa/components/custom_drop_down.dart';
-import 'package:flutter/material.dart';
+import 'package:aippmsa/models/CartItem.dart';
 import 'package:aippmsa/models/Item.dart';
+import 'package:aippmsa/models/ItemVariant.dart';
+import 'package:aippmsa/providers/cart_provider.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class SingleProductPage extends StatefulWidget {
   final Item item;
@@ -13,22 +17,30 @@ class SingleProductPage extends StatefulWidget {
 
 class SingleProductPageState extends State<SingleProductPage> {
   int _quantity = 1;
-
   String? _selectedSizeOption;
   String? _selectedColorOption;
 
+  // Increase the quantity of the product
   void _incrementQuantity() {
     setState(() {
       _quantity++;
     });
   }
 
+  // Decrease the quantity of the product
   void _decrementQuantity() {
     if (_quantity > 1) {
       setState(() {
         _quantity--;
       });
     }
+  }
+
+  // Show a SnackBar for alerts (feedback)
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   @override
@@ -49,7 +61,7 @@ class SingleProductPageState extends State<SingleProductPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image Section
+            // Display the product image
             Image.network(
               widget.item.image,
               width: double.infinity,
@@ -58,7 +70,7 @@ class SingleProductPageState extends State<SingleProductPage> {
             ),
             const SizedBox(height: 20),
 
-            // Product Title and Price
+            // Display product name and price
             Text(
               widget.item.name,
               style: const TextStyle(
@@ -78,30 +90,55 @@ class SingleProductPageState extends State<SingleProductPage> {
               ),
             ),
             const SizedBox(height: 20),
+
+            // Size selection dropdown
             CustomDropdown(
               label: 'Size',
               title: 'Select a Size',
-              selectedOption: _selectedSizeOption, // This is a state variable
-              options: const ['S', 'M', 'L', 'XL'], // List of options
+              selectedOption: _selectedSizeOption,
+              options: widget.item.variants.map((variant) => variant.size).toSet().toList(),
               onOptionSelected: (selected) {
                 setState(() {
-                  _selectedSizeOption = selected; // Handle the selected option
+                  _selectedSizeOption = selected;
+                  _selectedColorOption = null; // Reset color option when size changes
                 });
               },
             ),
             const SizedBox(height: 20),
-            CustomDropdown(
+
+            // Color selection dropdown
+            _selectedSizeOption == null
+                ? Container(
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.grey.shade400),
+              ),
+              child: const Text(
+                'Please select a size first',
+                style: TextStyle(fontSize: 16),
+              ),
+            )
+                : CustomDropdown(
               label: 'Color',
               title: 'Select a Color',
-              selectedOption: _selectedColorOption, // This is a state variable
-              options: const ['Orange', 'Black', 'Green', 'White'], // List of options
+              selectedOption: _selectedColorOption,
+              options: widget.item.variants
+                  .where((variant) => variant.size == _selectedSizeOption)
+                  .map((variant) => variant.color)
+                  .toSet()
+                  .toList(),
               onOptionSelected: (selected) {
                 setState(() {
-                  _selectedColorOption = selected; // Handle the selected option
+                  _selectedColorOption = selected;
                 });
               },
             ),
+
             const SizedBox(height: 20),
+
+            // Quantity selector
             Container(
               padding: const EdgeInsets.all(8.0),
               decoration: BoxDecoration(
@@ -111,10 +148,7 @@ class SingleProductPageState extends State<SingleProductPage> {
               ),
               child: Row(
                 children: [
-                  const Text(
-                    'Quantity',
-                    style: TextStyle(fontSize: 16),
-                  ),
+                  const Text('Quantity', style: TextStyle(fontSize: 16)),
                   SizedBox(width: MediaQuery.of(context).size.width * 0.3),
                   Container(
                     width: 30,
@@ -127,11 +161,8 @@ class SingleProductPageState extends State<SingleProductPage> {
                       iconSize: 16,
                       icon: const Icon(Icons.remove, color: Colors.white),
                       onPressed: _decrementQuantity,
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
                     ),
                   ),
-
                   const SizedBox(width: 15),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
@@ -139,10 +170,7 @@ class SingleProductPageState extends State<SingleProductPage> {
                       color: const Color(0xFFF4F4F4),
                       borderRadius: BorderRadius.circular(20.0),
                     ),
-                    child: Text(
-                      '$_quantity',
-                      style: const TextStyle(fontSize: 16),
-                    ),
+                    child: Text('$_quantity', style: const TextStyle(fontSize: 16)),
                   ),
                   const SizedBox(width: 15),
                   Container(
@@ -156,60 +184,73 @@ class SingleProductPageState extends State<SingleProductPage> {
                       iconSize: 16,
                       icon: const Icon(Icons.add, color: Colors.white),
                       onPressed: _incrementQuantity,
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
                     ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 20),
-            // Product Description
-            Text(
-              widget.item.description,
-              style: const TextStyle(fontSize: 14),
-            ),
+
+            // Product description
+            Text(widget.item.description, style: const TextStyle(fontSize: 14)),
             const SizedBox(height: 20),
           ],
         ),
       ),
-      // Bottom Bar
+
+      // Add to Cart button at the bottom
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(16.0),
         color: Colors.white,
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(10.0, 5.0, 10.5, 5.0),
-          decoration: BoxDecoration(
-            color: const Color.fromRGBO(134, 102, 225, 100),
-            borderRadius: BorderRadius.circular(25.0),
-            border: Border.all(color: Colors.grey.shade300),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+            backgroundColor: Colors.purple,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '\$${widget.item.price}',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Color.fromRGBO(255, 255, 255, 100)
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  // Handle Add to Cart
-                },
-                child: const Text(
-                  'Add to Cart',
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Color.fromRGBO(255, 255, 255, 100)
-                  ),
-                ),
-              )
+          onPressed: () {
+            if (_selectedSizeOption != null && _selectedColorOption != null) {
+              // Try to find the item with the selected size and color
+              ItemVariant? selectedVariant;
+              try {
+                selectedVariant = widget.item.variants.firstWhere(
+                      (variant) =>
+                  variant.size == _selectedSizeOption && variant.color == _selectedColorOption,
+                );
+              } catch (e) {
+                selectedVariant = null;  // Set to null if no matching variant is found
+              }
 
-            ],
-          ),
+              if (selectedVariant != null) {
+                // Check if selected quantity exceeds available stock
+                print(_quantity);
+                print('available qty: ${selectedVariant.quantity}');
+                if (_quantity > selectedVariant.quantity) {
+                  _showSnackBar('Stock not available for the selected quantity!');
+                } else {
+                  // Add the item to the cart
+                  Provider.of<CartProvider>(context, listen: false).addItem(
+                    CartItem(
+                      item: widget.item,
+                      size: _selectedSizeOption!,
+                      color: _selectedColorOption!,
+                      quantity: _quantity,
+                      id: widget.item.id,
+                    ),
+                  );
+                  _showSnackBar('Item added to cart!');
+                }
+              } else {
+                _showSnackBar('This size and color combination is not available!');
+              }
+            } else {
+              _showSnackBar('Please select size and color!');
+            }
+
+          },
+          child: const Text('Add to Cart'),
         ),
       ),
     );

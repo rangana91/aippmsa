@@ -1,4 +1,5 @@
 import 'package:aippmsa/models/Item.dart';
+import 'package:aippmsa/models/Order.dart';
 import 'package:aippmsa/response/auth_response_model.dart';
 import 'package:aippmsa/response/password_reset_response.dart';
 import 'package:aippmsa/response/register_response_model.dart';
@@ -11,7 +12,7 @@ class ApiServices {
 
   // Defining the base urls
   static const String _devBaseUrl = 'https://dev.example.com/api';
-  static const String _localBaseUrl = 'https://db59-2402-4000-b281-1884-fda9-5078-8f2d-bc2d.ngrok-free.app/api';
+  static const String _localBaseUrl = 'https://8d0e-2402-4000-2200-3d5e-7d54-909f-dd77-d577.ngrok-free.app/api';
   static const String _prodBaseUrl = 'https://prod.example.com/api';
 
   static const String _baseUrl = _localBaseUrl;
@@ -19,8 +20,8 @@ class ApiServices {
   ApiServices() {
     _dio = Dio(BaseOptions(
       baseUrl: _baseUrl,
-      connectTimeout: const Duration(milliseconds: 5000),
-      receiveTimeout: const Duration(milliseconds: 10000),
+      connectTimeout: const Duration(milliseconds: 20000),
+      receiveTimeout: const Duration(milliseconds: 20000),
     ));
     _dio.options.headers = {
       'Content-Type': 'application/json',
@@ -123,6 +124,59 @@ class ApiServices {
     await _setAuthorizationHeader();
     final response = await _dio.get('$_baseUrl/items');
     return response.data as List<dynamic>;
+  }
+
+  Future<String?> createPaymentIntent(int amount, String currency) async {
+    try {
+      await _setAuthorizationHeader();
+      final response = await _dio.post(
+        '$_localBaseUrl/create-payment-intent',
+        data: {
+          'amount': amount,
+          'currency': currency,
+        },
+      );
+      return response.data['clientSecret'];  // Extract clientSecret
+    } on DioException catch (e) {
+      print('Error creating payment intent: ${e.response?.data}');
+      return null;
+    }
+  }
+
+  Future<void> sendCartDataToBackend(List<Map<String, dynamic>> cartItems, String shippingAddress) async {
+    try {
+      await _setAuthorizationHeader();
+      final response = await _dio.post(
+        '$_baseUrl/create-order', // Your API endpoint
+        data: {
+          'items': cartItems,
+          'shipping_address': shippingAddress
+        },
+      );
+      if (response.statusCode == 200) {
+        print('Cart data successfully sent to the backend');
+      } else {
+        print('Failed to send cart data: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error while sending cart data: $e');
+    }
+  }
+
+  Future<List<dynamic>> fetchOrdersFromApi() async {
+    try {
+      await _setAuthorizationHeader();
+      final response = await _dio.get('$_baseUrl/get-orders');
+
+      if (response.statusCode == 200) {
+        return response.data as List<dynamic>;
+      } else {
+        throw Exception('Failed to load orders');
+      }
+    } catch (e) {
+      print('Error while loading order data: $e');
+      return [];
+    }
   }
 
 }

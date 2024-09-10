@@ -41,6 +41,10 @@ dependencies:
   path: ^1.9.0
   sqflite: ^2.3.3+1
   flutter_stripe: ^11.0.0
+  provider: ^6.1.2
+
+dependency_overrides:
+  stripe_android: "9.5.0+1"
 
 dev_dependencies:
   flutter_test:
@@ -76,6 +80,7 @@ flutter:
      - assets/t_shirt_2.png
      - assets/t_shirt_3.png
      - assets/t_shirt_4.png
+     - assets/orders.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
