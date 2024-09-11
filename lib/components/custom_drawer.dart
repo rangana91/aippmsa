@@ -1,5 +1,6 @@
 import 'package:aippmsa/main.dart';
 import 'package:aippmsa/orders_list.dart';
+import 'package:aippmsa/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -70,6 +71,16 @@ class CustomDrawerState extends State<CustomDrawer> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const OrdersList()),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.settings),
+                title: const Text('Profile'),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const Profile()),
                   );
                 },
               ),

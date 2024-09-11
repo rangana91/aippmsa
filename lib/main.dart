@@ -19,6 +19,7 @@ Future<void> main() async {
   Stripe.publishableKey = 'pk_test_51PpiigHB3paMEYnVX90sv6bNhwVJBlL92TfDR0AVXfR9laCm1nyhqotTFsoOZoL0p6WQK7j8vFiLoSTdPsbiulfw00ZOgocbyE';
   const storage = FlutterSecureStorage();
   final token = await storage.read(key: 'authToken');
+  print('TOKEN: $token');
   runApp(
     MultiProvider(
       providers: [

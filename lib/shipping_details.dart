@@ -68,7 +68,8 @@ class ShippingDetailsState extends State<ShippingDetails> {
         'item_id': cartItem.item.id,
         'quantity': cartItem.quantity,
         'price': cartItem.item.price,
-        'color': cartItem.color
+        'color': cartItem.color,
+        'size': cartItem.size
       };
     }).toList();
 

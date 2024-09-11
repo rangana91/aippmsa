@@ -19,7 +19,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 3,
       onCreate: (db, version) async {
         // Create items table
         await db.execute('''
@@ -46,12 +46,44 @@ class DatabaseHelper {
           )
         ''');
 
+        //create orders table
         await db.execute('''
           CREATE TABLE orders (
             id INTEGER PRIMARY KEY,
-            order_id INTEGER,
+            order_id STRING,
             items_count INTEGER,
-            status_name TEXT
+            status_name TEXT,
+            shipping_address TEXT
+          )
+        ''');
+
+        //create order items table
+        await db.execute('''
+          CREATE TABLE order_items (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            order_id INTEGER,
+            name TEXT,
+            quantity INTEGER,
+            price REAL,
+            color TEXT,
+            size TEXT,
+            item_image TEXT
+          )
+        ''');
+
+        //create user table
+        await db.execute('''
+          CREATE TABLE users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            first_name TEXT,
+            last_name TEXT,
+            date_of_birth TEXT,
+            gender TEXT,
+            email TEXT,
+            address TEXT,
+            number TEXT,
+            city TEXT,
+            post_code TEXT
           )
         ''');
       },

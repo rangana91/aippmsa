@@ -1,5 +1,5 @@
-import 'package:aippmsa/models/Item.dart';
-import 'package:aippmsa/models/Order.dart';
+import 'package:aippmsa/Services/user_service.dart';
+import 'package:aippmsa/models/User.dart';
 import 'package:aippmsa/response/auth_response_model.dart';
 import 'package:aippmsa/response/password_reset_response.dart';
 import 'package:aippmsa/response/register_response_model.dart';
@@ -12,7 +12,7 @@ class ApiServices {
 
   // Defining the base urls
   static const String _devBaseUrl = 'https://dev.example.com/api';
-  static const String _localBaseUrl = 'https://d2cf-2402-4000-2200-87d2-d829-87ef-6f73-4dc6.ngrok-free.app/api';
+  static const String _localBaseUrl = 'https://f49c-2402-4000-2200-9280-4d80-3642-34e4-4373.ngrok-free.app/api';
   static const String _prodBaseUrl = 'https://prod.example.com/api';
 
   static const String _baseUrl = _localBaseUrl;
@@ -176,6 +176,66 @@ class ApiServices {
     } catch (e) {
       print('Error while loading order data: $e');
       return [];
+    }
+  }
+
+  Future<void> fetchAndSaveUserData() async {
+    try {
+      await _setAuthorizationHeader();
+      final response = await _dio.get('$_baseUrl/get-user');
+
+      // Check if the response is successful
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> userData = response.data;
+        User user = User.fromJson(userData);
+        await UserService().clearUser();
+        await UserService().saveUser(user);
+
+        print('User data saved successfully');
+      } else {
+        print('Failed to fetch user data. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      // Handle error if any
+      print('Error fetching user data: $e');
+    }
+  }
+
+  //update user
+  Future<void> updateUserProfile(User updatedUser) async {
+    try {
+      await _setAuthorizationHeader();
+      // Prepare the request data
+      final data = {
+        "first_name": updatedUser.firstName,
+        "last_name": updatedUser.lastName,
+        "date_of_birth": updatedUser.dateOfBirth,
+        "gender": updatedUser.gender,
+        "email": updatedUser.email,
+        "address": updatedUser.address,
+        "number": updatedUser.number,
+        "city": updatedUser.city,
+        "post_code": updatedUser.postCode,
+      };
+
+      // Making a POST request with authorization token
+      final response = await _dio.post(
+          "$_baseUrl/update-user",
+          data: data
+      );
+
+      if (response.statusCode == 200) {
+        // Handle successful response
+        print("Profile updated successfully: ${response.data}");
+      } else {
+        // Handle errors
+        print("Failed to update profile: ${response.statusCode}");
+        throw Exception('Failed to update profile');
+      }
+    } catch (e) {
+      // Handle exceptions
+      print("Error updating profile: $e");
+      throw e;
     }
   }
 

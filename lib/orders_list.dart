@@ -1,5 +1,6 @@
 import 'package:aippmsa/Services/order_service.dart';
-import 'package:aippmsa/models/order.dart';
+import 'package:aippmsa/models/Order.dart';
+import 'package:aippmsa/single_order_page.dart';
 import 'package:flutter/material.dart';
 
 class OrdersList extends StatefulWidget {
@@ -175,7 +176,10 @@ class OrdersListState extends State<OrdersList> with SingleTickerProviderStateMi
             subtitle: Text('${order.itemCount} items'), // Show the item count
             trailing: const Icon(Icons.arrow_forward_ios, color: Colors.black),
             onTap: () {
-              // Handle order details navigation here
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SingleOrderPage(orderId: order.id,)),
+              );
             },
           ),
         );

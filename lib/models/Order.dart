@@ -1,23 +1,26 @@
 class Order {
   final int id;
-  final int orderNumber;
+  final String orderNumber;
   final int itemCount;
   final String status;
+  final String shippingAddress;
 
   Order({
     required this.id,
     required this.orderNumber,
     required this.itemCount,
     required this.status,
+    required this.shippingAddress,
   });
 
   // Create from Map (response from API)
   factory Order.fromMap(Map<String, dynamic> map) {
     return Order(
       id: map['id'],
-      orderNumber: map['id'], // Adjust based on your API field names
+      orderNumber: map['order_id'], // Adjust based on your API field names
       itemCount: map['items_count'],     // Directly from API response
       status: map['status_name'],
+      shippingAddress: map['shipping_address']
     );
   }
 
@@ -28,6 +31,7 @@ class Order {
       'order_id': orderNumber,
       'items_count': itemCount,
       'status_name': status,
+      'shipping_address': shippingAddress
     };
   }
 }
