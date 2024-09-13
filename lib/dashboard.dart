@@ -1,10 +1,13 @@
-import 'package:aippmsa/Services/ApiServices.dart';
 import 'package:aippmsa/Services/item_service.dart';
 import 'package:aippmsa/cart_page.dart';
 import 'package:aippmsa/components/item_future_builder.dart';
+import 'package:aippmsa/components/recommonded_items_builder.dart';
 import 'package:aippmsa/models/Item.dart';
+import 'package:aippmsa/providers/cart_provider.dart';
+import 'package:aippmsa/single_product_page.dart';
 import 'package:flutter/material.dart';
 import 'package:aippmsa/components/custom_drawer.dart';
+import 'package:provider/provider.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -20,6 +23,10 @@ class DashboardState extends State<Dashboard> {
   late Future<List<Item>> _itemsWomenFuture;
   late Future<List<Item>> _itemsMenFuture;
   late Future<List<Item>> _itemsKidFuture;
+  late Future<List<Item>> _itemsRecommended;
+  List<Item> _searchResults = [];
+  bool _isSearching = false;
+  final TextEditingController _searchController = TextEditingController();
 
   // Define the map of items and their asset paths
   final Map<String, String> items = {
@@ -34,7 +41,7 @@ class DashboardState extends State<Dashboard> {
   final List<Map<String, String>> recommendedItems = [
     {
       'image': 'assets/t_shirt_1.png',
-      'description': 'Description for item 1 test long description',
+      'description': 'Description for item 1',
       'price': '\$29.99',
     },
     {
@@ -67,13 +74,22 @@ class DashboardState extends State<Dashboard> {
     });
 
     await ItemService().updateItemList();
+    await ItemService().saveRecommendedItems();
 
     setState(() {
       _isLoading = false;
-      _itemsWomenFuture = ItemService().getItemsByCategory('women');
-      _itemsMenFuture = ItemService().getItemsByCategory('men');
-      _itemsKidFuture = ItemService().getItemsByCategory('kids');
+      _itemsWomenFuture = ItemService().getItemsByCategory('women', 'items');
+      _itemsMenFuture = ItemService().getItemsByCategory('men', 'items');
+      _itemsKidFuture = ItemService().getItemsByCategory('kids', 'items');
+      _itemsRecommended = ItemService().getItemsByCategory('Recommended', 'recommended_items');
     });
+  }
+
+  Future<List<Item>> searchItems(String query) async {
+    if (query.isEmpty) {
+      return [];
+    }
+    return ItemService().searchItemsByName(query);
   }
 
   void _toggleDrawer() {
@@ -87,31 +103,78 @@ class DashboardState extends State<Dashboard> {
     });
   }
 
+  void _onSearchChanged(String query) async {
+    if (query.isNotEmpty) {
+      setState(() {
+        _isSearching = true;
+      });
+      List<Item> results = await searchItems(query);
+      setState(() {
+        _searchResults = results;
+        _isSearching = false;
+      });
+    } else {
+      setState(() {
+        _searchResults = [];
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
         actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const CartPage()),
+          Consumer<CartProvider>(
+            builder: (context, cartProvider, child) {
+              int cartItemCount = cartProvider.cartItems.length;
+              return IconButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const CartPage()),
+                  );
+                },
+                icon: Stack(
+                  children: [
+                    const Icon(
+                      Icons.shopping_bag_outlined,
+                      color: Colors.black,
+                      size: 24.0,
+                    ),
+                    if (cartItemCount > 0)
+                      Positioned(
+                        right: 0,
+                        child: Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 16,
+                            minHeight: 16,
+                          ),
+                          child: Text(
+                            '$cartItemCount',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               );
             },
-            icon: const Icon(
-              Icons.shopping_bag_outlined,
-              color: Colors.black,
-              size: 24.0,
-            ),
-          )
+          ),
         ],
         leading: IconButton(
           icon: Image.asset(
-            _isDrawerOpen
-                ? 'assets/hamburger.png'
-                : 'assets/hamburger.png',
+            _isDrawerOpen ? 'assets/hamburger.png' : 'assets/hamburger.png',
             color: Colors.black,
             width: 20,
             height: 20,
@@ -162,15 +225,20 @@ class DashboardState extends State<Dashboard> {
                         border: Border.all(color: Colors.grey.shade300),
                       ),
                       child: TextField(
+                        controller: _searchController,
                         decoration: InputDecoration(
                           fillColor: const Color(0xffF5F6FA),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16.0, vertical: 10.0),
                           border: InputBorder.none,
                           hintText: 'Search...',
                           hintStyle: TextStyle(
                             color: Colors.grey.shade600,
                           ),
                         ),
+                        onChanged: (query) {
+                          _onSearchChanged(query);
+                        },
                       ),
                     ),
                   ),
@@ -193,191 +261,89 @@ class DashboardState extends State<Dashboard> {
                 ],
               ),
               const SizedBox(height: 20),
-              const Text(
-                'Most Popular',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.w600,
-                  fontSize: 19,
-                  color: Color(0xff1D1E20),
-                ),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                height: 70,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: items.entries.map((entry) {
-                    return Container(
-                      margin: const EdgeInsets.only(right: 18.0),
-                      padding: const EdgeInsets.all(8.0),
-                      decoration: BoxDecoration(
-                        color: const Color(0xffF5F6FA),
-                        borderRadius: BorderRadius.circular(15.0),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.2),
-                            spreadRadius: 1,
-                            blurRadius: 5,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 60,
-                            height: 60,
-                            margin: const EdgeInsets.only(right: 8.0),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(10.0),
-                              child: Image.asset(
-                                entry.value,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8.0),
-                          Flexible(
-                            child: Text(
-                              entry.key,
-                              style: const TextStyle(
-                                fontSize: 15,
-                                color: Colors.black,
-                                fontFamily: 'Inter',
-                                fontWeight: FontWeight.w400,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'Recommended For You',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.w600,
-                  fontSize: 19,
-                  color: Color(0xff1D1E20),
-                ),
-              ),
-              const SizedBox(height: 20),
-              GridView.builder(
+              _isSearching
+                  ? const Center(
+                child: CircularProgressIndicator(),
+              )
+                  : _searchResults.isNotEmpty
+                  ? ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 14.0,
-                  mainAxisSpacing: 14.0,
-                  childAspectRatio: 0.65,
-                ),
-                itemCount: recommendedItems.length,
+                itemCount: _searchResults.length,
                 itemBuilder: (context, index) {
-                  final item = recommendedItems[index];
-                  const cardHeight = 400.0;
-
-                  return SizedBox(
-                    height: cardHeight,
-                    child: Card(
-                      color: const Color(0xffF5F6FA),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.0),
-                      ),
-                      elevation: 5,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            height: cardHeight * 0.40,
-                            decoration: const BoxDecoration(
-                              borderRadius: BorderRadius.vertical(top: Radius.circular(15.0)),
-                            ),
-                            child: ClipRRect(
-                              borderRadius: const BorderRadius.vertical(top: Radius.circular(15.0)),
-                              child: Image.asset(
-                                item['image']!,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  item['description']!,
-                                  style: const TextStyle(
-                                    fontFamily: 'Inter',
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 11,
-                                    color: Color(0xff1D1E20),
-                                  ),
-                                ),
-                                const SizedBox(height: 8.0),
-                                Text(
-                                  item['price']!,
-                                  style: const TextStyle(
-                                    fontFamily: 'Inter',
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 13,
-                                    color: Color(0xff1D1E20),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                  final item = _searchResults[index];
+                  return ListTile(
+                    title: Text(item.name),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              SingleProductPage(item: item),
+                        ),
+                      );
+                    },
                   );
                 },
+              )
+                  : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Recommended For You',
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w600,
+                      fontSize: 19,
+                      color: Color(0xff1D1E20),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  RecommendedItemsBuilder(
+                      futureItems: _itemsRecommended),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'For Men',
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w600,
+                      fontSize: 19,
+                      color: Color(0xff1D1E20),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  ItemFutureBuilder(
+                      futureItems: _itemsMenFuture),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'For Women',
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w600,
+                      fontSize: 19,
+                      color: Color(0xff1D1E20),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  ItemFutureBuilder(
+                      futureItems: _itemsWomenFuture),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'For Kids',
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w600,
+                      fontSize: 19,
+                      color: Color(0xff1D1E20),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  ItemFutureBuilder(
+                      futureItems: _itemsKidFuture),
+                ],
               ),
-              const SizedBox(height: 20),
-              const Text(
-                'For Men',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.w600,
-                  fontSize: 19,
-                  color: Color(0xff1D1E20),
-                ),
-              ),
-              const SizedBox(height: 20),
-              ItemFutureBuilder(futureItems: _itemsMenFuture),
-              const SizedBox(height: 20),
-              const Text(
-                'For Women',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.w600,
-                  fontSize: 19,
-                  color: Color(0xff1D1E20),
-                ),
-              ),
-              const SizedBox(height: 20),
-              ItemFutureBuilder(futureItems: _itemsWomenFuture),
-              const SizedBox(height: 20),
-              const Text(
-                'For Kids',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.w600,
-                  fontSize: 19,
-                  color: Color(0xff1D1E20),
-                ),
-              ),
-              const SizedBox(height: 20),
-              ItemFutureBuilder(futureItems: _itemsKidFuture),
             ],
-
           ),
         ),
       ),

@@ -12,7 +12,7 @@ class ApiServices {
 
   // Defining the base urls
   static const String _devBaseUrl = 'https://dev.example.com/api';
-  static const String _localBaseUrl = 'https://f49c-2402-4000-2200-9280-4d80-3642-34e4-4373.ngrok-free.app/api';
+  static const String _localBaseUrl = 'https://4c24-2402-4000-b280-7cc7-18ba-c2b3-a84c-bcff.ngrok-free.app/api';
   static const String _prodBaseUrl = 'https://prod.example.com/api';
 
   static const String _baseUrl = _localBaseUrl;
@@ -123,6 +123,13 @@ class ApiServices {
   Future<List<dynamic>> fetchItems() async {
     await _setAuthorizationHeader();
     final response = await _dio.get('$_baseUrl/items');
+    return response.data as List<dynamic>;
+  }
+
+  //fetch item list
+  Future<List<dynamic>> fetchRecommendedItems() async {
+    await _setAuthorizationHeader();
+    final response = await _dio.get('$_baseUrl/get-predictions');
     return response.data as List<dynamic>;
   }
 

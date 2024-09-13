@@ -34,6 +34,19 @@ class DatabaseHelper {
           )
         ''');
 
+        // Create recommended items table
+        await db.execute('''
+          CREATE TABLE recommended_items (
+            id INTEGER PRIMARY KEY,
+            name TEXT,
+            description TEXT,
+            image TEXT,
+            price REAL,
+            category_name TEXT,
+            category_display_name TEXT
+          )
+        ''');
+
         // Create item_variants table for storing size, color, and quantity
         await db.execute('''
           CREATE TABLE item_variants (

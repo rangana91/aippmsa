@@ -224,9 +224,6 @@ class SingleProductPageState extends State<SingleProductPage> {
               }
 
               if (selectedVariant != null) {
-                // Check if selected quantity exceeds available stock
-                print(_quantity);
-                print('available qty: ${selectedVariant.quantity}');
                 if (_quantity > selectedVariant.quantity) {
                   _showSnackBar('Stock not available for the selected quantity!');
                 } else {
@@ -250,7 +247,10 @@ class SingleProductPageState extends State<SingleProductPage> {
             }
 
           },
-          child: const Text('Add to Cart'),
+          child: const Text(
+              'Add to Cart',
+            style: TextStyle(color: Color.fromRGBO(255, 255, 255, 100)),
+          ),
         ),
       ),
     );

@@ -28,17 +28,55 @@ class ItemService {
 
     // Use DatabaseHelper to handle the upsert logic
     final databaseHelper = DatabaseHelper();
-    await upsertItemsWithVariants(items, itemList); // Updated method to include item variants
+    await upsertItemsWithVariants(items, itemList, 'items'); // Updated method to include item variants
   }
 
-  // Fetch all items by category
-  Future<List<Item>> getItemsByCategory(String categoryName) async {
+  //save recommended items in items table
+  Future<void> saveRecommendedItems() async {
+    final apiService = ApiServices();
+    final itemList = await apiService.fetchRecommendedItems();
+
+    // Convert the fetched items to Item objects
+    List<Item> items = itemList.map<Item>((item) {
+      final category = item['category'];
+      String updatedText = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTPNViadqRr2TUSAJKhblKIwIgtO7dIkZcyY2WQWdRoIXmN5Nr-hZwbM4o56PDRGJwJ7c&usqp=CAU';
+
+      return Item(
+        id: item['id'],
+        name: item['name'],
+        description: item['description'],
+        image: updatedText,
+        price: (item['price'] as num).toDouble(),
+        categoryName: category['name'],
+        categoryDisplayName: 'Recommended',
+      );
+    }).toList();
+    await upsertItemsWithVariants(items, itemList, 'recommended_items');
+  }
+
+  //get saved recommended items
+  Future<List<Map<String, dynamic>>> getRecommendedItems() async {
     final db = await DatabaseHelper().database;
 
+    // Query to fetch all recommended items
+    final List<Map<String, dynamic>> items = await db.query(
+      'items',
+      where: 'category_display_name = ?',
+      whereArgs: ['Recommended'],
+    );
+
+    return items;
+  }
+
+
+  // Fetch all items by category
+  Future<List<Item>> getItemsByCategory(String categoryName, String tableName) async {
+    final db = await DatabaseHelper().database;
+    String columnName = (tableName == 'items') ? 'category_name' : 'category_display_name';
     // Query the items from the items table
     final List<Map<String, dynamic>> itemMaps = await db.query(
-      'items',
-      where: 'category_name = ?',
+      tableName,
+      where: '$columnName = ?',
       whereArgs: [categoryName],
     );
 
@@ -79,7 +117,7 @@ class ItemService {
 
 
   // Insert or Update (Upsert) items with variants
-  Future<void> upsertItemsWithVariants(List<Item> items, List<dynamic> originalItemList) async {
+  Future<void> upsertItemsWithVariants(List<Item> items, List<dynamic> originalItemList, String tableName) async {
     final db = await DatabaseHelper().database;
 
     for (int i = 0; i < items.length; i++) {
@@ -87,13 +125,13 @@ class ItemService {
 
       // Upsert the item
       await db.insert(
-        'items',
+        tableName,
         item.toMap(),
         conflictAlgorithm: ConflictAlgorithm.replace, // Replace if exists
       );
 
-      // Now handle item variants
-      final variants = originalItemList[i]['variants']; // Assuming API provides item variants
+      //handle item variants
+      final variants = originalItemList[i]['variants'];
 
       for (var variant in variants) {
         final itemVariant = ItemVariant(
@@ -177,4 +215,25 @@ class ItemService {
       return Item.fromMap(maps[i]);
     });
   }
+
+  //search items
+  Future<List<Item>> searchItems(String query) async {
+    if (query.isEmpty) {
+      return [];
+    }
+    return searchItemsByName(query);
+  }
+
+  Future<List<Item>> searchItemsByName(String query) async {
+    final db = await DatabaseHelper().database;
+    final results = await db.query(
+      'items',
+      where: 'name LIKE ?',
+      whereArgs: ['%$query%'],
+    );
+    return List.generate(results.length, (i) {
+      return Item.fromMap(results[i]);
+    });
+  }
+
 }

@@ -1,4 +1,5 @@
 import 'package:aippmsa/Services/ApiServices.dart';
+import 'package:aippmsa/Services/item_service.dart';
 import 'package:aippmsa/Services/payment_service.dart';
 import 'package:aippmsa/orders_list.dart';
 import 'package:aippmsa/providers/cart_provider.dart'; // Import the CartProvider
@@ -20,9 +21,13 @@ class ShippingDetailsState extends State<ShippingDetails> {
   final TextEditingController _cityController = TextEditingController();
   final TextEditingController _stateController = TextEditingController();
   final TextEditingController _postCodeController = TextEditingController();
+  bool _isLoading = false;
 
   Future<void> makePayment(double totalAmount) async {
     try {
+      setState(() {
+        _isLoading = true; // Show loading
+      });
       String? clientSecret = await _paymentService.createPaymentIntent((totalAmount * 100).toInt(), 'lkr');  // Amount in cents
 
       if (clientSecret != null) {
@@ -52,6 +57,12 @@ class ShippingDetailsState extends State<ShippingDetails> {
           SnackBar(content: Text('Error: $e')),
         );
       }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false; // Hide loading after process completes
+        });
+      }
     }
   }
 
@@ -75,11 +86,15 @@ class ShippingDetailsState extends State<ShippingDetails> {
 
     // Call the ApiService to send data
     await ApiServices().sendCartDataToBackend(cartData, formattedAddress);
+    await ItemService().updateItemList();
+    cartProvider.clearCart();
     if (mounted) {
-      Navigator.push(
+      Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const OrdersList()),
+            (Route<dynamic> route) => route.isFirst,
       );
+
     }
   }
 
@@ -246,7 +261,11 @@ class ShippingDetailsState extends State<ShippingDetails> {
                             makePayment(total);
                           }
                         },
-                        child: const Text(
+                        child: _isLoading
+                            ? const CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        )
+                            : const Text(
                           'Checkout',
                           style: TextStyle(fontSize: 16, color: Color.fromRGBO(255, 255, 255, 100)),
                         ),
