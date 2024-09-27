@@ -176,10 +176,15 @@ class CustomDrawerState extends State<CustomDrawer> {
     await storage.delete(key: 'authToken');
 
     if (mounted) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const MyHomePage(title: 'Flutter Demo Home Page')),
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const MyHomePage(title: 'AIPPMSA')),
+            (Route<dynamic> route) => false, // This will remove all routes from the stack
       );
+
+      // Navigator.pushReplacement(
+      //   context,
+      //   MaterialPageRoute(builder: (context) => const MyHomePage(title: 'Flutter Demo Home Page')),
+      // );
     }
   }
 }
