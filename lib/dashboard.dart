@@ -1,3 +1,4 @@
+import 'package:aippmsa/Services/ApiServices.dart';
 import 'package:aippmsa/Services/item_service.dart';
 import 'package:aippmsa/cart_page.dart';
 import 'package:aippmsa/components/item_future_builder.dart';
@@ -38,29 +39,29 @@ class DashboardState extends State<Dashboard> {
   };
 
   // Define a map for the recommended items
-  final List<Map<String, String>> recommendedItems = [
-    {
-      'image': 'assets/t_shirt_1.png',
-      'description': 'Description for item 1',
-      'price': '\$29.99',
-    },
-    {
-      'image': 'assets/t_shirt_2.png',
-      'description': 'Description for item 2',
-      'price': '\$39.99',
-    },
-    {
-      'image': 'assets/t_shirt_3.png',
-      'description': 'Description for item 3',
-      'price': '\$39.99',
-    },
-    {
-      'image': 'assets/t_shirt_4.png',
-      'description': 'Description for item 4',
-      'price': '\$39.99',
-    },
+  // final List<Map<String, String>> recommendedItems = [
+  //   {
+  //     'image': 'assets/t_shirt_1.png',
+  //     'description': 'Description for item 1',
+  //     'price': '\$29.99',
+  //   },
+  //   {
+  //     'image': 'assets/t_shirt_2.png',
+  //     'description': 'Description for item 2',
+  //     'price': '\$39.99',
+  //   },
+  //   {
+  //     'image': 'assets/t_shirt_3.png',
+  //     'description': 'Description for item 3',
+  //     'price': '\$39.99',
+  //   },
+  //   {
+  //     'image': 'assets/t_shirt_4.png',
+  //     'description': 'Description for item 4',
+  //     'price': '\$39.99',
+  //   },
     // Add more items as needed
-  ];
+  // ];
 
   @override
   void initState() {
@@ -69,6 +70,7 @@ class DashboardState extends State<Dashboard> {
   }
 
   Future<void> _refreshItems() async {
+    await ApiServices().fetchAndSaveUserData();
     setState(() {
       _isLoading = true;
     });

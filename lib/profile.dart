@@ -126,7 +126,7 @@ class ProfileState extends State<Profile> {
               const CircleAvatar(
                 radius: 50,
                 backgroundImage: NetworkImage(
-                    'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTPNViadqRr2TUSAJKhblKIwIgtO7dIkZcyY2WQWdRoIXmN5Nr-hZwbM4o56PDRGJwJ7c&usqp=CAU'), // Replace with actual image URL or asset
+                    'https://e7.pngegg.com/pngimages/799/987/png-clipart-computer-icons-avatar-icon-design-avatar-heroes-computer-wallpaper-thumbnail.png'), // Replace with actual image URL or asset
               ),
               const SizedBox(height: 20),
 
@@ -252,6 +252,7 @@ class ProfileState extends State<Profile> {
 
               CustomCardInputField(
                 labelText: 'Email',
+                isEnabled: false,
                 controller: _emailController,
                 validator: (value) {
                   if (value == null || value.isEmpty) {

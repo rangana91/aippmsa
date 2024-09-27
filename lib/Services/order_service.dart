@@ -90,8 +90,8 @@ class OrderService {
           'price': item['price'],
           'color': item['color'],
           'size': item['size'],
-          // 'item_image': item['item']['image'],
-          'item_image': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTPNViadqRr2TUSAJKhblKIwIgtO7dIkZcyY2WQWdRoIXmN5Nr-hZwbM4o56PDRGJwJ7c&usqp=CAU'
+          'item_image': item['item']['image'],
+          // 'item_image': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTPNViadqRr2TUSAJKhblKIwIgtO7dIkZcyY2WQWdRoIXmN5Nr-hZwbM4o56PDRGJwJ7c&usqp=CAU'
         },
         conflictAlgorithm: ConflictAlgorithm.replace,
       );

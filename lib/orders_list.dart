@@ -1,4 +1,5 @@
 import 'package:aippmsa/Services/order_service.dart';
+import 'package:aippmsa/dashboard.dart';
 import 'package:aippmsa/models/Order.dart';
 import 'package:aippmsa/single_order_page.dart';
 import 'package:flutter/material.dart';
@@ -60,69 +61,78 @@ class OrdersListState extends State<OrdersList> with SingleTickerProviderStateMi
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text('Orders', style: TextStyle(color: Colors.black)),
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          // TabBar for filtering orders
-          Container(
-            padding: const EdgeInsets.fromLTRB(0, 2, 5, 2),
-            child: TabBar(
-              isScrollable: true,
-              controller: _tabController,
-              indicator: BoxDecoration(
-                color: Colors.purple,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              tabs: List.generate(_tabController.length, (index) {
-                return Tab(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: _tabController.index == index ? Colors.purple : Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.purple, width: 1),
-                    ),
-                    child: Text(
-                      _tabLabel(index),
-                      style: TextStyle(
-                        color: _tabController.index == index ? Colors.white : Colors.black,
+    return WillPopScope(
+      onWillPop: () async {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const Dashboard()), // Then push the OrdersList page
+        );
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          title: const Text('Orders', style: TextStyle(color: Colors.black)),
+          centerTitle: true,
+        ),
+        body: Column(
+          children: [
+            // TabBar for filtering orders
+            Container(
+              padding: const EdgeInsets.fromLTRB(0, 2, 5, 2),
+              child: TabBar(
+                isScrollable: true,
+                controller: _tabController,
+                indicator: BoxDecoration(
+                  color: Colors.purple,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                tabs: List.generate(_tabController.length, (index) {
+                  return Tab(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: _tabController.index == index ? Colors.purple : Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Colors.purple, width: 1),
+                      ),
+                      child: Text(
+                        _tabLabel(index),
+                        style: TextStyle(
+                          color: _tabController.index == index ? Colors.white : Colors.black,
+                        ),
                       ),
                     ),
-                  ),
-                );
-              }),
-              onTap: (index) {
-                setState(() {
-                  _tabController.index = index; // Refresh UI to apply changes
-                });
-              },
-            ),
-          ),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: _refreshOrders, // Pull-to-refresh
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildOrderList(_filterOrdersByStatus('pending')),
-                  _buildOrderList(_filterOrdersByStatus('confirmed')),
-                  _buildOrderList(_filterOrdersByStatus('processing')),
-                  _buildOrderList(_filterOrdersByStatus('completed')),
-                  _buildOrderList(_filterOrdersByStatus('cancelled')),
-                  _buildOrderList(_filterOrdersByStatus('refunded')), // Example of additional status
-                ],
+                  );
+                }),
+                onTap: (index) {
+                  setState(() {
+                    _tabController.index = index; // Refresh UI to apply changes
+                  });
+                },
               ),
             ),
-          ),
-        ],
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: _refreshOrders, // Pull-to-refresh
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _buildOrderList(_filterOrdersByStatus('pending')),
+                    _buildOrderList(_filterOrdersByStatus('confirmed')),
+                    _buildOrderList(_filterOrdersByStatus('processing')),
+                    _buildOrderList(_filterOrdersByStatus('completed')),
+                    _buildOrderList(_filterOrdersByStatus('cancelled')),
+                    _buildOrderList(_filterOrdersByStatus('refunded')), // Example of additional status
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

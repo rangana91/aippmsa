@@ -19,7 +19,6 @@ Future<void> main() async {
   Stripe.publishableKey = 'pk_test_51PpiigHB3paMEYnVX90sv6bNhwVJBlL92TfDR0AVXfR9laCm1nyhqotTFsoOZoL0p6WQK7j8vFiLoSTdPsbiulfw00ZOgocbyE';
   const storage = FlutterSecureStorage();
   final token = await storage.read(key: 'authToken');
-  print('TOKEN: $token');
   runApp(
     MultiProvider(
       providers: [
@@ -28,7 +27,6 @@ Future<void> main() async {
       child: MyApp(isLoggedIn: token != null)
     ),
   );
-  // runApp(MyApp(isLoggedIn: token != null));
 }
 
 class MyApp extends StatelessWidget {
@@ -38,6 +36,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),

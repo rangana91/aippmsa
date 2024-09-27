@@ -5,6 +5,7 @@ class CustomCardInputField extends StatelessWidget {
   final TextEditingController controller;
   final String? Function(String?)? validator;
   final bool isPassword;
+  final bool isEnabled;
 
   const CustomCardInputField({
     super.key,
@@ -12,6 +13,7 @@ class CustomCardInputField extends StatelessWidget {
     required this.controller,
     this.validator,
     this.isPassword = false, // Default is not a password field
+    this.isEnabled = true
   });
 
   @override
@@ -24,6 +26,7 @@ class CustomCardInputField extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
         child: TextFormField(
+          enabled: isEnabled,
           controller: controller,
           obscureText: isPassword,
           decoration: InputDecoration(

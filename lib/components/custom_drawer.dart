@@ -1,3 +1,4 @@
+import 'package:aippmsa/Services/ApiServices.dart';
 import 'package:aippmsa/Services/order_service.dart';
 import 'package:aippmsa/Services/user_service.dart';
 import 'package:aippmsa/cart_page.dart';
@@ -113,7 +114,7 @@ class CustomDrawerState extends State<CustomDrawer> {
       ),
       currentAccountPicture: const CircleAvatar(
         backgroundImage: NetworkImage(
-          'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTPNViadqRr2TUSAJKhblKIwIgtO7dIkZcyY2WQWdRoIXmN5Nr-hZwbM4o56PDRGJwJ7c&usqp=CAU',
+          'https://e7.pngegg.com/pngimages/799/987/png-clipart-computer-icons-avatar-icon-design-avatar-heroes-computer-wallpaper-thumbnail.png',
         ),
       ),
       accountName: _user != null

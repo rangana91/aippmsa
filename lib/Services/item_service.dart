@@ -13,13 +13,13 @@ class ItemService {
     // Convert the fetched items to Item objects
     List<Item> items = itemList.map<Item>((item) {
       final category = item['category'];
-      String updatedText = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTPNViadqRr2TUSAJKhblKIwIgtO7dIkZcyY2WQWdRoIXmN5Nr-hZwbM4o56PDRGJwJ7c&usqp=CAU';
+      // String updatedText = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTPNViadqRr2TUSAJKhblKIwIgtO7dIkZcyY2WQWdRoIXmN5Nr-hZwbM4o56PDRGJwJ7c&usqp=CAU';
 
       return Item(
         id: item['id'],
         name: item['name'],
         description: item['description'],
-        image: updatedText,
+        image: item['image'],
         price: (item['price'] as num).toDouble(),
         categoryName: category['name'],
         categoryDisplayName: category['display_name'],
@@ -39,13 +39,13 @@ class ItemService {
     // Convert the fetched items to Item objects
     List<Item> items = itemList.map<Item>((item) {
       final category = item['category'];
-      String updatedText = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTPNViadqRr2TUSAJKhblKIwIgtO7dIkZcyY2WQWdRoIXmN5Nr-hZwbM4o56PDRGJwJ7c&usqp=CAU';
+      // String updatedText = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTPNViadqRr2TUSAJKhblKIwIgtO7dIkZcyY2WQWdRoIXmN5Nr-hZwbM4o56PDRGJwJ7c&usqp=CAU';
 
       return Item(
         id: item['id'],
         name: item['name'],
         description: item['description'],
-        image: updatedText,
+        image: item['image'],
         price: (item['price'] as num).toDouble(),
         categoryName: category['name'],
         categoryDisplayName: 'Recommended',
@@ -119,6 +119,10 @@ class ItemService {
   // Insert or Update (Upsert) items with variants
   Future<void> upsertItemsWithVariants(List<Item> items, List<dynamic> originalItemList, String tableName) async {
     final db = await DatabaseHelper().database;
+
+    if (tableName == 'recommended_items') {
+      await db.delete('recommended_items');
+    }
 
     for (int i = 0; i < items.length; i++) {
       final item = items[i];

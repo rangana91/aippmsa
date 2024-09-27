@@ -1,6 +1,7 @@
 import 'package:aippmsa/Services/ApiServices.dart';
 import 'package:aippmsa/Services/item_service.dart';
 import 'package:aippmsa/Services/payment_service.dart';
+import 'package:aippmsa/dashboard.dart';
 import 'package:aippmsa/orders_list.dart';
 import 'package:aippmsa/providers/cart_provider.dart'; // Import the CartProvider
 import 'package:flutter/material.dart';
@@ -22,6 +23,7 @@ class ShippingDetailsState extends State<ShippingDetails> {
   final TextEditingController _stateController = TextEditingController();
   final TextEditingController _postCodeController = TextEditingController();
   bool _isLoading = false;
+  bool _autoValidate = false;
 
   Future<void> makePayment(double totalAmount) async {
     try {
@@ -89,11 +91,16 @@ class ShippingDetailsState extends State<ShippingDetails> {
     await ItemService().updateItemList();
     cartProvider.clearCart();
     if (mounted) {
-      Navigator.pushAndRemoveUntil(
+      // Navigator.of(context).popUntil((route) => route is Dashboard); // This will pop until the dashboard is found
+      Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const OrdersList()),
-            (Route<dynamic> route) => route.isFirst,
+        MaterialPageRoute(builder: (context) => const OrdersList()), // Then push the OrdersList page
       );
+      // Navigator.pushAndRemoveUntil(
+      //   context,
+      //   MaterialPageRoute(builder: (context) => const OrdersList()),
+      //       (Route<dynamic> route) => route is Dashboard,
+      // );
 
     }
   }
@@ -125,7 +132,7 @@ class ShippingDetailsState extends State<ShippingDetails> {
           padding: const EdgeInsets.all(16.0),
           child: Form(
             key: _formKey,
-            autovalidateMode: AutovalidateMode.onUserInteraction, // Automatically re-validate the form as the user types
+            autovalidateMode: _autoValidate ? AutovalidateMode.always : AutovalidateMode.disabled,
             child: Column(
               children: [
                 TextFormField(
@@ -144,9 +151,6 @@ class ShippingDetailsState extends State<ShippingDetails> {
                       return 'Please enter your street address';
                     }
                     return null;
-                  },
-                  onChanged: (value) {
-                    _formKey.currentState?.validate(); // Re-validate when user types
                   },
                 ),
                 const SizedBox(height: 16.0),
@@ -167,9 +171,6 @@ class ShippingDetailsState extends State<ShippingDetails> {
                       return 'Please enter your city';
                     }
                     return null;
-                  },
-                  onChanged: (value) {
-                    _formKey.currentState?.validate(); // Re-validate when user types
                   },
                 ),
                 const SizedBox(height: 16.0),
@@ -194,9 +195,6 @@ class ShippingDetailsState extends State<ShippingDetails> {
                           }
                           return null;
                         },
-                        onChanged: (value) {
-                          _formKey.currentState?.validate(); // Re-validate when user types
-                        },
                       ),
                     ),
                     const SizedBox(width: 16.0),
@@ -217,9 +215,6 @@ class ShippingDetailsState extends State<ShippingDetails> {
                             return 'Please enter your post code';
                           }
                           return null;
-                        },
-                        onChanged: (value) {
-                          _formKey.currentState?.validate(); // Re-validate when user types
                         },
                       ),
                     ),
@@ -259,6 +254,10 @@ class ShippingDetailsState extends State<ShippingDetails> {
                           if (_formKey.currentState!.validate()) {
                             // If validation passes, proceed to makePayment
                             makePayment(total);
+                          } else {
+                            setState(() {
+                              _autoValidate = true;
+                            });
                           }
                         },
                         child: _isLoading

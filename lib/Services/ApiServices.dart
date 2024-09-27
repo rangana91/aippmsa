@@ -11,11 +11,11 @@ class ApiServices {
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
   // Defining the base urls
-  static const String _devBaseUrl = 'https://dev.example.com/api';
+  static const String _devBaseUrl = 'http://app.novatechlane.net/api';
   static const String _localBaseUrl = 'https://4c24-2402-4000-b280-7cc7-18ba-c2b3-a84c-bcff.ngrok-free.app/api';
   static const String _prodBaseUrl = 'https://prod.example.com/api';
 
-  static const String _baseUrl = _localBaseUrl;
+  static const String _baseUrl = _devBaseUrl;
 
   ApiServices() {
     _dio = Dio(BaseOptions(
@@ -137,7 +137,7 @@ class ApiServices {
     try {
       await _setAuthorizationHeader();
       final response = await _dio.post(
-        '$_localBaseUrl/create-payment-intent',
+        '$_baseUrl/create-payment-intent',
         data: {
           'amount': amount,
           'currency': currency,
@@ -218,30 +218,40 @@ class ApiServices {
         "last_name": updatedUser.lastName,
         "date_of_birth": updatedUser.dateOfBirth,
         "gender": updatedUser.gender,
-        "email": updatedUser.email,
         "address": updatedUser.address,
         "number": updatedUser.number,
         "city": updatedUser.city,
         "post_code": updatedUser.postCode,
       };
-
+      print(data);
       // Making a POST request with authorization token
       final response = await _dio.post(
           "$_baseUrl/update-user",
           data: data
       );
-
+      print(response);
       if (response.statusCode == 200) {
         // Handle successful response
         print("Profile updated successfully: ${response.data}");
       } else {
+        print(response);
         // Handle errors
         print("Failed to update profile: ${response.statusCode}");
         throw Exception('Failed to update profile');
       }
     } catch (e) {
-      // Handle exceptions
-      print("Error updating profile: $e");
+      if (e is DioException) {
+        // Check for bad response status code 422 and print the validation errors
+        if (e.response?.statusCode == 422) {
+          print("Validation error: ${e.response?.data}");
+        } else {
+          // Handle other Dio exceptions
+          print("Error: ${e.message}");
+        }
+      } else {
+        // Handle general exceptions
+        print("Error updating profile: $e");
+      }
       throw e;
     }
   }
