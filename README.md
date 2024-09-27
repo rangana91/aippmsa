@@ -1,4 +1,4 @@
-# AIPPMSA - AI Powered Mobile Shopping Assistant Application
+# AIPPMSA - AI Powered Personalized Mobile Shopping Assistant Application
 
 ## Overview
 
