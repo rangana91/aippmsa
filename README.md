@@ -2,7 +2,7 @@
 
 ## Overview
 
-AIPPMSA (AI Powered Mobile Shopping Assistant) is a Flutter-based mobile application that provides a personalized shopping experience using AI. It offers product recommendations based on user preferences and past purchases. The application features a sleek UI, secure user authentication, dynamic product categories, and integrates with REST APIs for real-time data fetching.
+AIPPMSA (AI Powered Personalized Mobile Shopping Assistant) is a Flutter-based mobile application that provides a personalized shopping experience using AI. It offers product recommendations based on user preferences. The application features a sleek UI, secure user authentication, dynamic product categories, and integrates with REST APIs for real-time data fetching.
 
 ## Features
 
@@ -60,8 +60,8 @@ aippmsa/
 ├── lib/
 │   ├── models/             # Data models for the app
 │   ├── services/           # API services using Dio for network calls
-│   ├── components/            # Reusabe components
-│   ├── providers/            # App wise providers
+│   ├── components/         # Reusable components
+│   ├── providers/          # App wise providers
 │   └── main.dart           # Entry point of the application
 ├── assets/                 # Images, fonts, and other static assets
 └── pubspec.yaml            # Project dependencies and assets configuration
